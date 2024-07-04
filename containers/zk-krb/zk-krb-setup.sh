@@ -7,11 +7,11 @@ readonly KRB_PATH="/krb"
 
 readonly KRB_SRV_HOSTNAME=${KRB_SRV_HOSTNAME:-krb-srv-host}
 
-# server(s) 
+# server(s)
 # TODO: maybe this value deserves a env var shared in docker compose.
-# This principal name must match the -Dzookeeper.server.principal=zookeeper/localhost 
-# JVM option in this setup. 
-readonly ZK_SERVER_PRINICPAL="zookeeper/localhost" 
+# This principal name must match the -Dzookeeper.server.principal=zookeeper/localhost
+# JVM option in this setup.
+readonly ZK_SERVER_PRINICPAL="zookeeper/localhost"
 readonly ZK_SERVER_KEYTAB="${KRB_PATH}/zookeeper.keytab"
 
 tee /etc/krb5.conf <<EOF

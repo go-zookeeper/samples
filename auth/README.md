@@ -1,23 +1,23 @@
 # Zookeeper with Kerberos
 
 ## Summary
-Zookeeper supports Authentication with Simple Authentication Security Layer (SASL). Both Server-Server mutual  authentication as well as Client-Server authentication. 
+Zookeeper supports Authentication with Simple Authentication Security Layer (SASL). Both Server-Server mutual  authentication as well as Client-Server authentication.
 
-This example and README are here to provide an example of how the Go Zookeeper library can and supports this setup. 
+This example and README are here to provide an example of how the Go Zookeeper library can and supports this setup.
 
 ## Client-Server authentication
-The `docker-compose.yaml` at this point in time sets up a working example of a Client-Server Kerberos SASL configuration. This setup has the Kerberos server as a separate running container to illustrate the situation where the Zookeeper server and any client is remotely communicating to a central Kerberos server. 
+The `docker-compose.yaml` at this point in time sets up a working example of a Client-Server Kerberos SASL configuration. This setup has the Kerberos server as a separate running container to illustrate the situation where the Zookeeper server and any client is remotely communicating to a central Kerberos server.
 
-note: cd into this auth dir. 
+note: cd into this auth dir.
 
     docker compose build
     docker compose up
 
-The current result allows the `zkCli.sh` to connect.  
+The current result allows the `zkCli.sh` to connect.
 
     docker compose run --rm zoo-client zkCli.sh -server zoo-host
 
-The result of this should be something like this: 
+The result of this should be something like this:
 
     4-06-23 21:13:29,835 [myid:] - INFO  [main:o.a.z.ZooKeeper@637] - Initiating client connection, connectString=zoo-host sessionTimeout=30000 watcher=org.apache.zookeeper.ZooKeeperMain$MyWatcher@77f99a05
     2024-06-23 21:13:29,840 [myid:] - INFO  [main:o.a.z.c.X509Util@88] - Setting -D jdk.tls.rejectClientInitiatedRenegotiation=true to disable client-initiated TLS renegotiation
@@ -65,7 +65,7 @@ And check the ACLs
     : cdrwa
 
 ### todo
-In the future this will be to have a Go program demonstrating using the go-zookeeper/zk library to perform the same operations. 
+In the future this will be to have a Go program demonstrating using the go-zookeeper/zk library to perform the same operations.
 
 
 ## debugging
@@ -74,9 +74,9 @@ In the future this will be to have a Go program demonstrating using the go-zooke
 This option for both the server and Java client may help in debugging the principles being used. This setting gets added to the env var `JVMFLAGS`
 
 ### No valid credentials provided (Mechanism level: Server not found in Kerberos database (7) - LOOKING_UP_SERVER)
-This for me ended up being that the client was assuming a server principal using a hostname in it. This example setup does not want to and is not configured with host principles, we want the same server principal for all the zookeeper server hosts. 
+This for me ended up being that the client was assuming a server principal using a hostname in it. This example setup does not want to and is not configured with host principles, we want the same server principal for all the zookeeper server hosts.
 
-To find this out, I used the `-Dsun.security.krb5.debug=true` from above. 
+To find this out, I used the `-Dsun.security.krb5.debug=true` from above.
 
     >>>KRBError:
          sTime is Sun Jun 23 20:19:36 UTC 2024 1719173976000
@@ -88,23 +88,23 @@ To find this out, I used the `-Dsun.security.krb5.debug=true` from above.
          sname is zookeeper/zoo-kerberos-app-zoo1-1.zoo-kerberos-app_default@EXAMPLE.COM
          msgType is 30
 
-Notice here the `sname` including `zoo-kerberos-app-zoo1-1.zoo-kerberos-app_default`. 
+Notice here the `sname` including `zoo-kerberos-app-zoo1-1.zoo-kerberos-app_default`.
 
-To fix this I add `-Dzookeeper.server.principal=zookeeper/localhost@EXAMPLE.COM` to essentially hard code this into the client connection code what we want the server principal to be verbatim. 
+To fix this I add `-Dzookeeper.server.principal=zookeeper/localhost@EXAMPLE.COM` to essentially hard code this into the client connection code what we want the server principal to be verbatim.
 
     zookeeper.server.principal : Specifies the server principal to be used by the client for authentication, while connecting to the zookeeper server, when Kerberos authentication is enabled. If this configuration is provided, then the ZooKeeper client will NOT USE any of the following parameters to determine the server principal: zookeeper.sasl.client.username, zookeeper.sasl.client.canonicalize.hostname, zookeeper.server.realm Note: this config parameter is working only for ZooKeeper 3.5.7+, 3.6.0+
 
 ref: https://zookeeper.apache.org/doc/current/zookeeperProgrammers.html
 
 ### ZooKeeper server to authenticate itself properly: javax.security.auth.login.LoginException: krb-srv-host: Name or service not known
-This means the krb5 config is pointing to the kerberos-server container. In my case, the kadmind service not starting was causing the container to crash, Docker compose does not have the dns record of the stopped container. TIL. 
+This means the krb5 config is pointing to the kerberos-server container. In my case, the kadmind service not starting was causing the container to crash, Docker compose does not have the dns record of the stopped container. TIL.
 
-make sure the kerberos-server is up and running healthy. 
+make sure the kerberos-server is up and running healthy.
 
 ### javax.security.auth.login.LoginException: No password provided
-This means the file is found, but is not readable from the server user. normally this is fixed with chown'ing the file to the `zookeeper` user. This user is assumed from the base Zookeeper docker container. 
+This means the file is found, but is not readable from the server user. normally this is fixed with chown'ing the file to the `zookeeper` user. This user is assumed from the base Zookeeper docker container.
 
-or the keytab file does not exist, either one honestly. 
+or the keytab file does not exist, either one honestly.
 
 ### Error in authenticating with a Zookeeper Quorum member: the quorum member's saslToken is null
 This was from a mismatch of what principles were being attempted from the server.
@@ -113,7 +113,7 @@ I resolved with two changes to the setup, added this to both client and server j
 
     -Dzookeeper.server.principal=zookeeper/localhost@EXAMPLE.COM
 
-As well as in the kerberos database adding a new principal 
+As well as in the kerberos database adding a new principal
 
     kadmin.local -q "addprinc -randkey zookeeper/localhost@EXAMPLE.COM"
     kadmin.local -q "ktadd -k /krb/zookeeper.keytab zookeeper/localhost"
@@ -154,7 +154,7 @@ This was an attempt at having the client krb5.conf file use localhost as if the 
 
 </td></tr>
 <tr><td>
-localhost is not where the server is running. 
+localhost is not where the server is running.
 </td><td>
 Ensure the client krb5.conf has the hostname where the server resides
 

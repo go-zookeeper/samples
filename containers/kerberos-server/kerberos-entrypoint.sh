@@ -4,7 +4,7 @@ set -xe
 readonly REALM="EXAMPLE.COM"
 readonly KRB_PATH="/krb"
 
-# server(s) 
+# server(s)
 readonly ZK_SERVER_PRINICPAL="zookeeper/localhost"
 readonly ZK_SERVER_KEYTAB="${KRB_PATH}/zookeeper.keytab"
 
@@ -58,7 +58,7 @@ $MASTER_PASSWORD
 EOF
 echo ""
 
-# clean from any previous run(s). with docker you never really know. 
+# clean from any previous run(s). with docker you never really know.
 rm -rf "${ZK_CLIENT_KEYTAB}"
 rm -rf "${ZK_SERVER_KEYTAB}"
 
@@ -83,8 +83,8 @@ kadmin.local -q "addprinc -randkey ${ZK_CLIENT_PRINICPAL}"
 kadmin.local -q "ktadd -k ${ZK_CLIENT_KEYTAB} ${ZK_CLIENT_PRINICPAL}"
 echo ""
 
-echo "Debug listing pricipals" 
+echo "Debug listing pricipals"
 kadmin.local -q "listprincs"
 
-krb5kdc 
+krb5kdc
 kadmind -nofork

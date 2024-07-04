@@ -2,7 +2,7 @@ name: zoo-kerberos-app
 
 services:
   kerberos-server:
-    build: 
+    build:
       context: ./../containers/kerberos-server
       dockerfile: Dockerfile
     hostname: krb-srv-host
@@ -10,7 +10,7 @@ services:
       - shared-tmpfs:/krb
 
   zoo1:
-    build: 
+    build:
       context: ./../containers/zk-krb
       dockerfile: Dockerfile
     restart: always

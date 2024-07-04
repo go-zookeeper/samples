@@ -21,7 +21,7 @@ tee /etc/krb5.conf <<EOF
 	}
 EOF
 
-# Used for the zkCli.sh toolchain. Demonstrate the working standard tooling. 
+# Used for the zkCli.sh toolchain. Demonstrate the working standard tooling.
 tee /conf/jaas.conf <<EOF
 Client {
        com.sun.security.auth.module.Krb5LoginModule required
